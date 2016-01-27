@@ -56,6 +56,12 @@ def format_upper_one_word(dictation):
     words = [word.upper() for word in SplitDictation(dictation)]
     return "".join(words)
 
+# Format: somewords
+def format_lower_one_word(dictation):
+    """ lower <dictation> """
+    words = [word.lower() for word in SplitDictation(dictation)]
+    return "".join(words)
+
 # Format: SOME_WORDS
 def format_upper_score(dictation):
     """ upper score <dictation> """
