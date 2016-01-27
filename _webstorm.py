@@ -28,6 +28,26 @@ import _format
 
 # Make sure dragonfly errors show up in NatLink messages.
 dragonfly.log.setup_log()
+print ""
+
+phonetics = {
+		"a": "eh",
+		"b": "bee",
+		"c": "(see | sea)",
+		"d": "(dee | de)",
+		"h": "aitch",
+		"i": "(i | eye)",
+		"l": "el",
+		"m": "em",
+		"o": "oh",
+		"r": "(are | arr)",
+		"t": "(tea | tee)",
+		"u": "(you | ewe)",
+	}
+
+def to_phonetics(characters):
+	return " ".join(map(lambda char: phonetics[char], list(characters)))
+
 
 def load(global_environment):
 	config = Config("webstorm")
@@ -57,6 +77,18 @@ def load(global_environment):
 		"ui new file": new_file()
 	}
 
+	def new_line(position):
+		return Key("home, enter, home")
+
+	webstorm_editor_map = {
+		"alt ef eight": Key("a-f8"),
+		"format code": Key("a-f8"),
+		"format file": Key("cas-l"),
+	}
+
+	webstorm_editor_elements = {
+		"new_line_position": List("new_line_positions", ["above", "below"])
+	}
 	def assign_var(text, text2):
 		return "%(left)s = %(right)s;"
 
@@ -76,17 +108,20 @@ def load(global_environment):
 
 	}
 
-	webstorm_html_map = {
-		"div": Text("<div>"),
-		"u l": Text("<ul>"),
-		"oh ell": Text("<ol>"),
-		"l i": Text("<li>"),
-
-	    "if": insert_live_template("#if"),
-		"each": insert_live_template("#each"),
-		"else": Text("{else}"),
-		"unless": insert_live_template("#unless"),
-	}
+	webstorm_html_map = dict([
+			("div", Text("<div>")),
+			(to_phonetics("ul"), Text("<ul")),
+			(to_phonetics("ol"), Text("<ol")),
+			(to_phonetics("li"), Text("<li")),
+			(to_phonetics("br"), Text("<br")),
+			(to_phonetics("id"), Text("id")),
+			("equals", Text("=")),
+			("pound", Text("####")),
+			("if", insert_live_template("#if")),
+			("each", insert_live_template("#each")),
+			("else", Text("{else}")),
+			("unless", insert_live_template("#unless")),
+	])
 
 	webstorm_element_map = {
 		"dictation": Dictation(),
@@ -101,13 +136,16 @@ def load(global_environment):
 	webstorm_environment = _repeat.Environment(name="WebStorm",
 								       parent=global_environment,
 									   context=AppContext(executable = "WebStorm"),
-									   action_map=combine_maps(webstorm_words_map, webstorm_action_map, webstorm_ui_map),
+									   action_map=combine_maps(webstorm_words_map, webstorm_action_map,
+															   webstorm_ui_map,
+															   webstorm_editor_map),
 									   element_map=webstorm_element_map)
 
 	webstorm_html_environment = _repeat.Environment(name="WebStorm html",
 									   parent=webstorm_environment,
 									   context=AppContext(title = ".html"),
-									   action_map=webstorm_html_map)
+									   action_map=webstorm_html_map,
+									   element_map=webstorm_element_map)
 
 	webstorm_js_environment = _repeat.Environment(name="WebStorm js",
 									   parent=webstorm_environment,
